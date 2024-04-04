@@ -1,8 +1,9 @@
 <?php
 
 namespace App\Http\Controllers\Api;
-
 use App\Http\Controllers\Controller;
+use App\Http\Resources\StudentEditResource;
+use App\Http\Resources\StudentResource;
 use App\Models\Student;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
@@ -15,10 +16,9 @@ class StudentController extends Controller
         $students = Student::all();
         if($students->count()>0){
 
-        return response()->json([
-            'status' => 200,
-            'students' => $students
-        ],200);
+            return StudentResource::collection($students);
+
+        
     }else{
         return response()->json([
             'status' => 404,
@@ -31,11 +31,8 @@ class StudentController extends Controller
     {
         $student = Student ::find($id);
         if($student){
+            return StudentEditResource::make($student);
 
-            return response()->json([
-                'status' => 200,
-                'message' => $student
-            ],200);
 
         }else{
             return response()->json([
@@ -45,9 +42,6 @@ class StudentController extends Controller
 
         }
     }
-
-
-
     public function store(Request $request)
     {
         $validator  = Validator::make($request->all(),[
@@ -93,15 +87,13 @@ class StudentController extends Controller
     }
 
     public function edit($id){
-        $student = Student ::find($id);
-        if($student){
 
-            return response()->json([
-                'status' => 200,
-                'message' => $student
-            ],200);
+        $students = Student::all();
+        if($students->count()>0){
 
-        }else{
+            return StudentEditResource::collection($students);
+        }
+    else{
             return response()->json([
                 'status' => 404,
                 'Status_message' => 'No such student Found'
@@ -113,12 +105,14 @@ class StudentController extends Controller
 
     public  function update( Request $request,int $id){
     {
+
         $validator  = Validator::make($request->all(),[
             'name' =>'required|string|max:191',
             'course' =>'required|string|max:191',
             'email' =>'required|email|max:191',
             'phone' =>'required|digits:10',
         ]);
+        
 
         if ($validator->fails()){
             return response()->json([
